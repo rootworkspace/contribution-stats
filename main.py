@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 def get_color(count):
     """Maps commit counts to a vibrant palette."""
-    # Using vibrant colors that look great with white outlines
     colors = [
         "rgba(45, 45, 48, 1)",      # 0
         "rgba(255, 105, 180, 0.7)",  # 1-2
@@ -31,7 +30,9 @@ def generate_svg_graph(json_path, output_path="contribution_graph.svg"):
     cell_size, padding = 12, 3
     margin_left, margin_top = 35, 30
     legend_height = 35
-    text_style = 'fill: #8b949e; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 10px;'
+    
+    # FIX: Use single quotes for font names to avoid breaking the style attribute's double quotes
+    text_style = "fill: #8b949e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 10px;"
     
     # Process data into weeks
     weeks = []
@@ -52,15 +53,18 @@ def generate_svg_graph(json_path, output_path="contribution_graph.svg"):
     width = margin_left + len(weeks) * (cell_size + padding) + 20
     height = margin_top + 7 * (cell_size + padding) + legend_height
 
-    # Start SVG with a dark theme container
-    svg = [f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" style="background-color: #0d1117; border-radius: 6px;">']
+    # Start SVG
+    svg = [f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" style="background-color: #0d1117; border-radius: 6px;" shape-rendering="geometricPrecision">']
     
-    # Brighter Outline Definition
+    # Brighter Outline Logic
     def get_rect_svg(x, y, count, date_str=None):
         color = get_color(count)
         stroke_color = "rgba(255, 255, 255, 0.05)" if count == 0 else "rgba(255, 255, 255, 0.3)"
-        title = f"<title>{count} contributions on {date_str}</title>" if date_str else ""
-        return f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" rx="2" ry="2" fill="{color}" stroke="{stroke_color}" stroke-width="1">{title}</rect>'
+        
+        # Ensure title content is simple and safe for XML
+        title_tag = f"<title>{count} contributions on {date_str}</title>" if date_str else ""
+        
+        return f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" rx="2" ry="2" fill="{color}" stroke="{stroke_color}" stroke-width="1">{title_tag}</rect>'
 
     # Add Month Labels
     last_month = None
@@ -74,14 +78,14 @@ def generate_svg_graph(json_path, output_path="contribution_graph.svg"):
                 svg.append(f'<text x="{x}" y="20" style="{text_style}">{month_name}</text>')
                 last_month = month_name
 
-    # Add Day Labels (Mon, Wed, Fri)
+    # Add Day Labels
     day_labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     for i, label in enumerate(day_labels):
         if i in [1, 3, 5]: 
             y = margin_top + i * (cell_size + padding) + 10
             svg.append(f'<text x="5" y="{y}" style="{text_style}">{label}</text>')
 
-    # Draw Contribution Rectangles
+    # Draw Rectangles
     for i, week in enumerate(weeks):
         x = margin_left + i * (cell_size + padding)
         for j, day in enumerate(week):
@@ -94,14 +98,14 @@ def generate_svg_graph(json_path, output_path="contribution_graph.svg"):
 
     # Draw Legend
     legend_y = height - 20
-    legend_colors_vals = [0, 2, 5, 15, 20]
-    legend_x_start = width - (len(legend_colors_vals) * (cell_size + padding)) - 50
+    legend_vals = [0, 2, 5, 15, 20]
+    legend_x_start = width - (len(legend_vals) * (cell_size + padding)) - 50
     
     svg.append(f'<text x="{legend_x_start - 35}" y="{legend_y + 10}" style="{text_style}">Less</text>')
-    for i, val in enumerate(legend_colors_vals):
+    for i, val in enumerate(legend_vals):
         lx = legend_x_start + i * (cell_size + padding)
         svg.append(get_rect_svg(lx, legend_y, val))
-    svg.append(f'<text x="{legend_x_start + len(legend_colors_vals) * (cell_size + padding) + 5}" y="{legend_y + 10}" style="{text_style}">More</text>')
+    svg.append(f'<text x="{legend_x_start + len(legend_vals) * (cell_size + padding) + 5}" y="{legend_y + 10}" style="{text_style}">More</text>')
 
     svg.append('</svg>')
 
