@@ -31,7 +31,6 @@ def generate_svg_graph(json_path, output_path="contribution_graph.svg"):
     margin_left, margin_top = 35, 30
     legend_height = 35
     
-    # FIX: Use single quotes for font names to avoid breaking the style attribute's double quotes
     text_style = "fill: #8b949e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 10px;"
     
     # Process data into weeks
